@@ -412,39 +412,46 @@
     const message = document.getElementById('f-message').value.trim();
     const success = document.getElementById('form-success');
     const error = document.getElementById('form-error');
+    const btn = document.querySelector('.send-btn');
 
     success.style.display = 'none';
     error.style.display = 'none';
 
     if (!name || !contact || !message) {
-      error.textContent = 'Bitte füllen Sie alle Felder aus.';
       error.style.display = 'block';
+      error.textContent = 'Bitte füllen Sie alle Felder aus.';
       return;
     }
+
+    btn.disabled = true;
+    btn.textContent = 'Wird gesendet…';
 
     try {
       const res = await fetch('https://formspree.io/f/mlgveow', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'https://martina.leitlbua.de'
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ name, contact, message })
+        body: JSON.stringify({ name: name, contact: contact, message: message })
       });
+      const data = await res.json();
       if (res.ok) {
         success.style.display = 'block';
         document.getElementById('f-name').value = '';
         document.getElementById('f-contact').value = '';
         document.getElementById('f-message').value = '';
       } else {
-        error.textContent = 'Es gab einen Fehler. Bitte versuchen Sie es erneut.';
         error.style.display = 'block';
+        error.textContent = 'Fehler: ' + (data.error || 'Bitte erneut versuchen.');
       }
-    } catch {
-      error.textContent = 'Es gab einen Fehler. Bitte versuchen Sie es erneut.';
+    } catch (e) {
       error.style.display = 'block';
+      error.textContent = 'Verbindungsfehler: ' + e.message;
     }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-send"></i> Anfrage senden';
   }
 </script>
 
